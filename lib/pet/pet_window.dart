@@ -9,6 +9,7 @@ import '../core/notification_setup.dart';
 import '../core/storage.dart';
 import '../ui/radial_menu.dart';
 import '../ui/settings_page.dart';
+import '../ui/chat_page.dart';
 
 class PetWindow extends StatefulWidget {
   const PetWindow({super.key});
@@ -85,6 +86,17 @@ class _PetWindowState extends State<PetWindow> with WindowListener {
       body: GestureDetector(
         onPanStart: (details) {
           windowManager.startDragging();
+        },
+        onTap: () async {
+          // Single tap → open AI Chat
+          await windowManager.setSize(const Size(420, 600));
+          if (!mounted) return;
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ChatPage()),
+          );
+          final config = await Storage.getConfig();
+          await windowManager.setSize(Size(config.size, config.size));
         },
         onSecondaryTap: () async {
           // Expand window so we can see the quick access menu clearly

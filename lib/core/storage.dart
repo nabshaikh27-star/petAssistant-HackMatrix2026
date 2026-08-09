@@ -3,6 +3,7 @@ import 'package:path_provider/path_provider.dart';
 import '../models/pet_config.dart';
 import '../models/reminder.dart';
 import '../models/shortcut.dart';
+import '../models/chat_message.dart';
 
 class Storage {
   static late Isar isar;
@@ -13,7 +14,7 @@ class Storage {
       isar = Isar.getInstance()!;
     } else {
       isar = await Isar.open(
-        [PetConfigSchema, ReminderSchema, QuickAccessShortcutSchema],
+        [PetConfigSchema, ReminderSchema, QuickAccessShortcutSchema, ChatMessageSchema],
         directory: dir.path,
       );
     }

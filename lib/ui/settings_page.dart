@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:isar/isar.dart';
@@ -7,6 +8,7 @@ import '../core/hotkey_setup.dart';
 import '../core/startup_setup.dart';
 import '../models/pet_config.dart';
 import '../models/shortcut.dart';
+import '../ai_assistant/key_storage.dart';
 import 'reminders_page.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -73,7 +75,10 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const Divider(height: 32),
 
-
+          // ── AI Assistant ──────────────────────────────────────────────────
+          const _SectionHeader(title: '🤖 AI Assistant (Gemini)', subtitle: 'Your key is stored securely — never logged or exposed'),
+          const _AiSettingsSection(),
+          const Divider(height: 32),
 
           // ── General ──────────────────────────────────────────────────────
           const _SectionHeader(title: '⚙️ General', subtitle: ''),
@@ -379,3 +384,205 @@ class _ShortcutsSectionState extends State<_ShortcutsSection> {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// AI Assistant settings — key stored securely in flutter_secure_storage
+// ─────────────────────────────────────────────────────────────────────────────
+class _AiSettingsSection extends StatefulWidget {
+  const _AiSettingsSection();
+
+  @override
+  State<_AiSettingsSection> createState() => _AiSettingsSectionState();
+}
+
+class _AiSettingsSectionState extends State<_AiSettingsSection> {
+  final _keyCtrl = TextEditingController();
+  final _urlCtrl = TextEditingController();
+  final _modelCtrl = TextEditingController();
+  String _maskedKey = 'Not set';
+  bool _editingKey = false;
+  bool _testing = false;
+  String? _testResult;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _keyCtrl.dispose();
+    _urlCtrl.dispose();
+    _modelCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    final masked = await SecureKeyStorage.getMaskedKey();
+    final url = await SecureKeyStorage.getBaseUrl();
+    final model = await SecureKeyStorage.getModel();
+    setState(() {
+      _maskedKey = masked;
+      _urlCtrl.text = url;
+      _modelCtrl.text = model;
+    });
+  }
+
+  Future<void> _saveKey() async {
+    final key = _keyCtrl.text.trim();
+    if (key.isEmpty) return;
+    await SecureKeyStorage.saveApiKey(key);
+    _keyCtrl.clear();
+    setState(() => _editingKey = false);
+    await _load();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('API key saved securely ✓')),
+      );
+    }
+  }
+
+  Future<void> _saveSettings() async {
+    await SecureKeyStorage.saveBaseUrl(_urlCtrl.text.trim());
+    await SecureKeyStorage.saveModel(_modelCtrl.text.trim());
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Settings saved ✓')),
+      );
+    }
+  }
+
+  Future<void> _testConnection() async {
+    setState(() { _testing = true; _testResult = null; });
+    final result = await _pingGemini();
+    setState(() { _testResult = result; _testing = false; });
+  }
+
+  Future<String> _pingGemini() async {
+    try {
+      final key = await SecureKeyStorage.getApiKey();
+      if (key == null || key.isEmpty) return '✗ No API key set';
+      final baseUrl = await SecureKeyStorage.getBaseUrl();
+      final model = await SecureKeyStorage.getModel();
+
+      final dio = Dio();
+      final response = await dio.post(
+        '$baseUrl/chat/completions',
+        data: {'model': model, 'messages': [{'role': 'user', 'content': 'Hi'}], 'max_tokens': 5},
+        options: Options(
+          headers: {'Authorization': 'Bearer $key'},
+          receiveTimeout: const Duration(seconds: 15),
+        ),
+      );
+      if (response.statusCode == 200) return '✓ Connected to $model successfully!';
+      return '✗ Unexpected status: ${response.statusCode}';
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
+        return '✗ Invalid API key — check your Gemini key';
+      }
+      return '✗ Connection failed — check URL and key';
+    } catch (_) {
+      return '✗ Connection failed — check your internet';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Masked key row
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.key, color: Colors.amber),
+          title: const Text('API Key', style: TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: Text(
+            _editingKey ? 'Enter key below…' : _maskedKey,
+            style: TextStyle(color: _maskedKey == 'Not set' ? Colors.red : Colors.green),
+          ),
+          trailing: TextButton(
+            onPressed: () => setState(() { _editingKey = !_editingKey; }),
+            child: Text(_editingKey ? 'Cancel' : 'Change'),
+          ),
+        ),
+
+        // Key input (only when editing)
+        if (_editingKey)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _keyCtrl,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Paste Gemini API key',
+                      hintText: 'AIza...',
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(onPressed: _saveKey, child: const Text('Save')),
+              ],
+            ),
+          ),
+
+        // Base URL field
+        TextField(
+          controller: _urlCtrl,
+          decoration: const InputDecoration(labelText: 'API Base URL', isDense: true),
+        ),
+        const SizedBox(height: 8),
+
+        // Model field
+        TextField(
+          controller: _modelCtrl,
+          decoration: const InputDecoration(
+            labelText: 'Model',
+            hintText: 'gemini-2.0-flash',
+            isDense: true,
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        Row(
+          children: [
+            ElevatedButton.icon(
+              icon: const Icon(Icons.save, size: 16),
+              label: const Text('Save Settings'),
+              onPressed: _saveSettings,
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              icon: _testing
+                  ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.wifi_tethering, size: 16),
+              label: const Text('Test Connection'),
+              onPressed: _testing ? null : _testConnection,
+            ),
+          ],
+        ),
+
+        if (_testResult != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              _testResult!,
+              style: TextStyle(
+                fontSize: 12,
+                color: _testResult!.startsWith('✓') ? Colors.green : Colors.red,
+              ),
+            ),
+          ),
+
+        const SizedBox(height: 6),
+        const Text(
+          '🔒 Key stored with Windows DPAPI encryption — never plaintext, never logged.',
+          style: TextStyle(fontSize: 11, color: Colors.grey),
+        ),
+      ],
+    );
+  }
+}
