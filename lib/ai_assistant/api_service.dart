@@ -16,44 +16,44 @@ class AiApiService {
   }) async* {
     // Read credentials from secure storage — never log these
     final apiKey = await SecureKeyStorage.getApiKey();
-    final baseUrl = await SecureKeyStorage.getBaseUrl();
-    final model = await SecureKeyStorage.getModel();
+    final model = 'gemini-2.5-flash';
 
     if (apiKey == null || apiKey.isEmpty) {
       yield '[ERROR] No API key set. Please add your Gemini API key in Settings.';
       return;
     }
 
-    // If an image is attached, convert the last user message to vision format
-    final requestMessages = List<Map<String, dynamic>>.from(messages);
+    // Convert messages to native Gemini format
+    final geminiContents = messages.map((msg) {
+      final role = msg['role'] == 'assistant' ? 'model' : 'user';
+      return {
+        'role': role,
+        'parts': [{'text': msg['content']}]
+      };
+    }).toList();
+
     if (imagePath != null) {
       final imageBytes = await File(imagePath).readAsBytes();
       final base64Image = base64Encode(imageBytes);
-      final lastMsg = requestMessages.last;
-      requestMessages[requestMessages.length - 1] = {
-        'role': lastMsg['role'],
-        'content': [
-          {'type': 'text', 'text': lastMsg['content']},
-          {
-            'type': 'image_url',
-            'image_url': {'url': 'data:image/png;base64,$base64Image'},
-          },
-        ],
-      };
+      final lastContent = geminiContents.last;
+      final parts = List<Map<String, dynamic>>.from(lastContent['parts'] as Iterable);
+      parts.add({
+        'inline_data': {
+          'mime_type': 'image/png',
+          'data': base64Image
+        }
+      });
+      lastContent['parts'] = parts;
     }
 
     final dio = Dio();
     try {
       final response = await dio.post(
-        '$baseUrl/chat/completions',
+        'https://generativelanguage.googleapis.com/v1beta/models/$model:streamGenerateContent?alt=sse&key=$apiKey',
         data: {
-          'model': model,
-          'messages': requestMessages,
-          'stream': true,
+          'contents': geminiContents,
         },
         options: Options(
-          // API key sent directly in header — never logged, never echoed
-          headers: {'Authorization': 'Bearer $apiKey'},
           responseType: ResponseType.stream,
           receiveTimeout: const Duration(seconds: 60),
         ),
@@ -76,12 +76,15 @@ class AiApiService {
 
           try {
             final json = jsonDecode(payload) as Map<String, dynamic>;
-            final choices = json['choices'] as List?;
-            if (choices == null || choices.isEmpty) continue;
-            final delta = (choices[0] as Map)['delta'] as Map?;
-            final content = delta?['content'] as String?;
-            if (content != null && content.isNotEmpty) {
-              yield content;
+            final candidates = json['candidates'] as List?;
+            if (candidates == null || candidates.isEmpty) continue;
+            final contentMap = (candidates[0] as Map)['content'] as Map?;
+            final parts = contentMap?['parts'] as List?;
+            if (parts != null && parts.isNotEmpty) {
+              final text = (parts[0] as Map)['text'] as String?;
+              if (text != null && text.isNotEmpty) {
+                yield text;
+              }
             }
           } catch (_) {
             // Skip malformed SSE lines — never log the raw content

@@ -5,6 +5,7 @@ import '../core/storage.dart';
 import '../core/tap_detector.dart';
 import '../core/path_launcher.dart';
 import 'settings_page.dart';
+import 'theme.dart';
 
 class RadialMenuOverlay extends StatefulWidget {
   final VoidCallback onClose;
@@ -57,16 +58,17 @@ class _RadialMenuOverlayState extends State<RadialMenuOverlay> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black54,
+      color: Colors.black.withOpacity(0.4),
       child: Center(
         child: Container(
           width: 320,
           constraints: const BoxConstraints(maxHeight: 480),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
             borderRadius: BorderRadius.circular(20),
-            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 20)],
+            border: Border.all(color: AppTheme.primaryAccent.withOpacity(0.3)),
+            boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 20)],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -75,9 +77,9 @@ class _RadialMenuOverlayState extends State<RadialMenuOverlay> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     "Quick Access",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),

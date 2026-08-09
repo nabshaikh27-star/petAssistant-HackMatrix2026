@@ -15,11 +15,13 @@ class SecureKeyStorage {
   static const _keyName = 'gemini_api_key';
   static const _baseUrlKey = 'ai_base_url';
   static const _modelKey = 'ai_model';
+  static const _onboardingKey = 'has_completed_onboarding';
+  static const _themeKey = 'is_dark_mode';
 
   // Default Gemini free-tier endpoint
   static const defaultBaseUrl =
       'https://generativelanguage.googleapis.com/v1beta/openai';
-  static const defaultModel = 'gemini-2.0-flash';
+  static const defaultModel = 'gemini-1.5-flash';
 
   // ── API Key ───────────────────────────────────────────────────────────────
 
@@ -65,5 +67,27 @@ class SecureKeyStorage {
 
   static Future<String> getModel() async {
     return (await _storage.read(key: _modelKey)) ?? defaultModel;
+  }
+
+  // ── Onboarding ────────────────────────────────────────────────────────────
+
+  static Future<void> completeOnboarding() async {
+    await _storage.write(key: _onboardingKey, value: 'true');
+  }
+
+  static Future<bool> hasCompletedOnboarding() async {
+    final value = await _storage.read(key: _onboardingKey);
+    return value == 'true';
+  }
+
+  // ── Theme ─────────────────────────────────────────────────────────────────
+
+  static Future<void> setDarkMode(bool isDark) async {
+    await _storage.write(key: _themeKey, value: isDark.toString());
+  }
+
+  static Future<bool> isDarkMode() async {
+    final value = await _storage.read(key: _themeKey);
+    return value != 'false'; // Default to true if not set
   }
 }

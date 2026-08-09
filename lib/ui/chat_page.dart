@@ -6,7 +6,9 @@ import 'package:screen_capturer/screen_capturer.dart';
 import '../ai_assistant/chat_provider.dart';
 import '../ai_assistant/offline_service.dart';
 import '../models/chat_message.dart';
+import '../core/animation_state.dart';
 import 'capture_permission_dialog.dart';
+import 'theme.dart';
 
 class ChatPage extends ConsumerStatefulWidget {
   const ChatPage({super.key});
@@ -21,7 +23,14 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   String? _pendingImagePath;
 
   @override
+  void initState() {
+    super.initState();
+    PetAnimationController().setTalking();
+  }
+
+  @override
   void dispose() {
+    PetAnimationController().setIdle();
     _inputCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
@@ -102,7 +111,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     chatAsync.whenData((_) => _scrollToBottom());
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Chat with Pet 🐾'),
         actions: [
@@ -224,8 +232,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              border: Border(top: BorderSide(color: Colors.grey.shade200)),
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
             ),
             child: Row(
               children: [
@@ -264,13 +272,6 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                       hintText: isOnline
                           ? 'Ask your pet anything…'
                           : 'Offline — connect to use AI chat',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     ),
                     onSubmitted: (_) => isOnline ? _send() : null,
                     maxLines: 3,
@@ -283,7 +284,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 IconButton(
                   icon: const Icon(Icons.send),
                   onPressed: isOnline && !petIsTyping ? _send : null,
-                  color: isOnline ? Colors.blue : Colors.grey,
+                  color: isOnline ? AppTheme.primaryAccent : Colors.grey,
                 ),
               ],
             ),
@@ -341,7 +342,8 @@ class _MessageBubble extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: isUser ? Colors.blue : Colors.grey.shade100,
+                      color: isUser ? AppTheme.primaryAccent : Theme.of(context).colorScheme.surface,
+                      border: Border.all(color: isUser ? Colors.transparent : Theme.of(context).dividerColor),
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(16),
                         topRight: const Radius.circular(16),
@@ -352,7 +354,7 @@ class _MessageBubble extends StatelessWidget {
                     child: Text(
                       message.text,
                       style: TextStyle(
-                        color: isUser ? Colors.white : Colors.black87,
+                        color: isUser ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color,
                         fontSize: 14,
                       ),
                     ),
@@ -365,7 +367,7 @@ class _MessageBubble extends StatelessWidget {
               padding: EdgeInsets.only(left: 6, bottom: 4),
               child: CircleAvatar(
                 radius: 14,
-                backgroundColor: Colors.blue,
+                backgroundColor: AppTheme.primaryAccent,
                 child: Icon(Icons.person, size: 16, color: Colors.white),
               ),
             ),

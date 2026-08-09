@@ -8,8 +8,13 @@ import 'core/hotkey_setup.dart';
 import 'core/startup_setup.dart';
 import 'core/notification_setup.dart';
 import 'pet/pet_window.dart';
-
+import 'ui/onboarding_screen.dart';
+import 'ui/theme.dart';
+import 'ai_assistant/key_storage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
+
+final themeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.dark);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,9 +35,12 @@ void main() async {
   // 5. Init Notifications
   await SystemNotificationManager().init();
 
+  bool hasOnboarded = await SecureKeyStorage.hasCompletedOnboarding();
+  bool isDark = await SecureKeyStorage.isDarkMode();
+
   WindowOptions windowOptions = WindowOptions(
-    size: Size(config.size, config.size),
-    center: false,
+    size: hasOnboarded ? Size(config.size, config.size) : const Size(600, 500),
+    center: !hasOnboarded,
     backgroundColor: Colors.transparent,
     skipTaskbar: true, // Hide from taskbar, we will use tray
     titleBarStyle: TitleBarStyle.hidden,
@@ -43,8 +51,9 @@ void main() async {
     await windowManager.setAsFrameless();
     await windowManager.setHasShadow(false);
     
-    // Move to saved position
-    await windowManager.setPosition(Offset(config.positionX, config.positionY));
+    if (hasOnboarded) {
+      await windowManager.setPosition(Offset(config.positionX, config.positionY));
+    }
     
     await windowManager.show();
     await windowManager.focus();
@@ -53,22 +62,29 @@ void main() async {
     await SystemTrayManager().init();
   });
 
-  runApp(const ProviderScope(child: DesktopPetApp()));
+  runApp(ProviderScope(
+    overrides: [
+      themeProvider.overrideWith((ref) => isDark ? ThemeMode.dark : ThemeMode.light),
+    ],
+    child: DesktopPetApp(hasOnboarded: hasOnboarded),
+  ));
 }
 
-class DesktopPetApp extends StatelessWidget {
-  const DesktopPetApp({super.key});
+class DesktopPetApp extends ConsumerWidget {
+  final bool hasOnboarded;
+  const DesktopPetApp({super.key, required this.hasOnboarded});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Desktop Pet AI',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const PetWindow(),
+      themeMode: themeMode,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      home: hasOnboarded ? const PetWindow() : const OnboardingScreen(),
     );
   }
 }

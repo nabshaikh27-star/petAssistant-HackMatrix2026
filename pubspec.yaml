@@ -39,6 +39,7 @@ dependencies:
   image: ^4.2.0
   launch_at_startup: ^0.2.2
   package_info_plus: ^8.0.0
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:

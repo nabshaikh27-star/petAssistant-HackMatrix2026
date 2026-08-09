@@ -1,24 +1,28 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:isar/isar.dart';
+import 'package:path_provider/path_provider.dart';
 import '../core/storage.dart';
 import '../core/hotkey_setup.dart';
 import '../core/startup_setup.dart';
 import '../models/pet_config.dart';
 import '../models/shortcut.dart';
 import '../ai_assistant/key_storage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../main.dart';
 import 'reminders_page.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool launchOnStartup = false;
   String hotkeyMode = 'toggle_visibility';
   HotKey? currentHotKey;
@@ -56,11 +60,15 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Pet Settings')),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          // ── Custom Pet Avatar ────────────────────────────────────────────
+          const _SectionHeader(title: '🐾 Custom Pet Avatar', subtitle: 'Upload a custom PNG/JPG avatar or reset to default car pet'),
+          const _CustomPetAvatarSection(),
+          const Divider(height: 32),
+
           // ── Quick-Access Shortcuts (inline) ──────────────────────────────
           const _SectionHeader(title: '⚡ Quick-Access Shortcuts', subtitle: 'Double-tap or triple-tap buttons in the radial menu'),
           const _ShortcutsSection(),
@@ -82,6 +90,16 @@ class _SettingsPageState extends State<SettingsPage> {
 
           // ── General ──────────────────────────────────────────────────────
           const _SectionHeader(title: '⚙️ General', subtitle: ''),
+          SwitchListTile(
+            title: const Text('Dark Theme'),
+            subtitle: const Text('Toggle between light and dark cyber-glass theme'),
+            value: ref.watch(themeProvider) == ThemeMode.dark,
+            onChanged: (value) async {
+              await SecureKeyStorage.setDarkMode(value);
+              ref.read(themeProvider.notifier).state = value ? ThemeMode.dark : ThemeMode.light;
+            },
+          ),
+          const Divider(),
           SwitchListTile(
             title: const Text('Launch on Windows Startup'),
             subtitle: const Text('Automatically open the AI pet when you log in.'),
@@ -396,8 +414,6 @@ class _AiSettingsSection extends StatefulWidget {
 
 class _AiSettingsSectionState extends State<_AiSettingsSection> {
   final _keyCtrl = TextEditingController();
-  final _urlCtrl = TextEditingController();
-  final _modelCtrl = TextEditingController();
   String _maskedKey = 'Not set';
   bool _editingKey = false;
   bool _testing = false;
@@ -412,19 +428,13 @@ class _AiSettingsSectionState extends State<_AiSettingsSection> {
   @override
   void dispose() {
     _keyCtrl.dispose();
-    _urlCtrl.dispose();
-    _modelCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _load() async {
     final masked = await SecureKeyStorage.getMaskedKey();
-    final url = await SecureKeyStorage.getBaseUrl();
-    final model = await SecureKeyStorage.getModel();
     setState(() {
       _maskedKey = masked;
-      _urlCtrl.text = url;
-      _modelCtrl.text = model;
     });
   }
 
@@ -442,16 +452,6 @@ class _AiSettingsSectionState extends State<_AiSettingsSection> {
     }
   }
 
-  Future<void> _saveSettings() async {
-    await SecureKeyStorage.saveBaseUrl(_urlCtrl.text.trim());
-    await SecureKeyStorage.saveModel(_modelCtrl.text.trim());
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Settings saved ✓')),
-      );
-    }
-  }
-
   Future<void> _testConnection() async {
     setState(() { _testing = true; _testResult = null; });
     final result = await _pingGemini();
@@ -462,15 +462,17 @@ class _AiSettingsSectionState extends State<_AiSettingsSection> {
     try {
       final key = await SecureKeyStorage.getApiKey();
       if (key == null || key.isEmpty) return '✗ No API key set';
-      final baseUrl = await SecureKeyStorage.getBaseUrl();
-      final model = await SecureKeyStorage.getModel();
+      final model = 'gemini-2.5-flash';
 
       final dio = Dio();
       final response = await dio.post(
-        '$baseUrl/chat/completions',
-        data: {'model': model, 'messages': [{'role': 'user', 'content': 'Hi'}], 'max_tokens': 5},
+        'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$key',
+        data: {
+          'contents': [
+            {'role': 'user', 'parts': [{'text': 'Hi'}]}
+          ]
+        },
         options: Options(
-          headers: {'Authorization': 'Bearer $key'},
           receiveTimeout: const Duration(seconds: 15),
         ),
       );
@@ -480,9 +482,9 @@ class _AiSettingsSectionState extends State<_AiSettingsSection> {
       if (e.response?.statusCode == 401 || e.response?.statusCode == 403) {
         return '✗ Invalid API key — check your Gemini key';
       }
-      return '✗ Connection failed — check URL and key';
-    } catch (_) {
-      return '✗ Connection failed — check your internet';
+      return '✗ Error ${e.response?.statusCode}: ${e.response?.statusMessage ?? e.message}';
+    } catch (e) {
+      return '✗ Connection failed — $e';
     }
   }
 
@@ -529,32 +531,8 @@ class _AiSettingsSectionState extends State<_AiSettingsSection> {
             ),
           ),
 
-        // Base URL field
-        TextField(
-          controller: _urlCtrl,
-          decoration: const InputDecoration(labelText: 'API Base URL', isDense: true),
-        ),
-        const SizedBox(height: 8),
-
-        // Model field
-        TextField(
-          controller: _modelCtrl,
-          decoration: const InputDecoration(
-            labelText: 'Model',
-            hintText: 'gemini-2.0-flash',
-            isDense: true,
-          ),
-        ),
-        const SizedBox(height: 10),
-
         Row(
           children: [
-            ElevatedButton.icon(
-              icon: const Icon(Icons.save, size: 16),
-              label: const Text('Save Settings'),
-              onPressed: _saveSettings,
-            ),
-            const SizedBox(width: 8),
             OutlinedButton.icon(
               icon: _testing
                   ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
@@ -583,6 +561,191 @@ class _AiSettingsSectionState extends State<_AiSettingsSection> {
           style: TextStyle(fontSize: 11, color: Colors.grey),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Custom Pet Avatar Section
+// ─────────────────────────────────────────────────────────────────────────────
+class _CustomPetAvatarSection extends StatefulWidget {
+  const _CustomPetAvatarSection();
+
+  @override
+  State<_CustomPetAvatarSection> createState() => _CustomPetAvatarSectionState();
+}
+
+class _CustomPetAvatarSectionState extends State<_CustomPetAvatarSection> {
+  String? _petImagePath;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvatarConfig();
+  }
+
+  Future<void> _loadAvatarConfig() async {
+    final config = await Storage.getConfig();
+    setState(() {
+      _petImagePath = config.petImagePath;
+    });
+  }
+
+  Future<void> _pickAvatarImage() async {
+    setState(() => _isLoading = true);
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['png', 'jpg', 'jpeg'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final sourcePath = result.files.single.path!;
+        final appDocDir = await getApplicationDocumentsDirectory();
+        final ext = sourcePath.split('.').last;
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final targetPath = '${appDocDir.path}${Platform.pathSeparator}custom_pet_avatar_$timestamp.$ext';
+
+        await File(sourcePath).copy(targetPath);
+
+        final config = await Storage.getConfig();
+        config.petImagePath = targetPath;
+        await Storage.isar.writeTxn(() async {
+          await Storage.isar.petConfigs.put(config);
+        });
+
+        setState(() {
+          _petImagePath = targetPath;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Custom pet avatar updated!')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update avatar: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _resetToDefault() async {
+    setState(() => _isLoading = true);
+    try {
+      final config = await Storage.getConfig();
+      config.petImagePath = null;
+      await Storage.isar.writeTxn(() async {
+        await Storage.isar.petConfigs.put(config);
+      });
+
+      setState(() {
+        _petImagePath = null;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Reset to default avatar (Car Pet).')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to reset avatar: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool hasCustomAvatar = _petImagePath != null && File(_petImagePath!).existsSync();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  ),
+                  child: hasCustomAvatar
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.file(
+                            File(_petImagePath!),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, color: Colors.red),
+                          ),
+                        )
+                      : const Icon(Icons.directions_car, size: 48, color: Colors.white54),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        hasCustomAvatar ? 'Custom Avatar (Live Preview)' : 'Default Car Pet',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        hasCustomAvatar ? _petImagePath! : 'Using standard Rive animation',
+                        style: Theme.of(context).textTheme.bodySmall,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.image, size: 18),
+                    label: const Text('Choose Image'),
+                    onPressed: _isLoading ? null : _pickAvatarImage,
+                  ),
+                ),
+                if (hasCustomAvatar) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.restore, size: 18),
+                      label: const Text('Reset'),
+                      onPressed: _isLoading ? null : _resetToDefault,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

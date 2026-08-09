@@ -36,10 +36,12 @@ class SystemHotkeyManager {
             final cfg = await Storage.getConfig();
             if (cfg.hotkeyMode == 'toggle_visibility') {
               bool isVisible = await windowManager.isVisible();
-              if (isVisible) {
+              bool isFocused = await windowManager.isFocused();
+              if (isVisible && isFocused) {
                 windowManager.hide();
               } else {
                 windowManager.show();
+                windowManager.focus();
               }
             } else {
               // "open_chat" mode
