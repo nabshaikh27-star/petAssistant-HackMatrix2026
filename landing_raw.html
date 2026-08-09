@@ -1,0 +1,337 @@
+﻿<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SENTINEL AI - Virtual Desktop Pet &amp; AI Assistant</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;800&amp;family=Inter:wght@400&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#842225",
+                        "outline": "#86948a",
+                        "surface-tint": "#4edea3",
+                        "background": "#131313",
+                        "surface-container-low": "#1c1b1b",
+                        "surface": "#131313",
+                        "secondary-fixed": "#c2ecd8",
+                        "on-tertiary": "#650911",
+                        "on-secondary-fixed-variant": "#284e3f",
+                        "secondary-container": "#284e3f",
+                        "surface-container-high": "#2a2a2a",
+                        "on-primary-container": "#00422b",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffdad7",
+                        "inverse-on-surface": "#313030",
+                        "on-error": "#690005",
+                        "tertiary": "#ffb3af",
+                        "error": "#ffb4ab",
+                        "primary": "#4edea3",
+                        "primary-fixed": "#6ffbbe",
+                        "on-secondary-container": "#96beab",
+                        "surface-container-highest": "#353534",
+                        "secondary-fixed-dim": "#a7cfbc",
+                        "outline-variant": "#3c4a42",
+                        "on-secondary-fixed": "#002116",
+                        "inverse-primary": "#006c49",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary-fixed-dim": "#ffb3af",
+                        "on-background": "#e5e2e1",
+                        "surface-container": "#201f1f",
+                        "secondary": "#a7cfbc",
+                        "on-primary-fixed": "#002113",
+                        "tertiary-container": "#fc7c78",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-tertiary-fixed": "#410005",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#711419",
+                        "surface-variant": "#353534",
+                        "on-surface-variant": "#bbcabf",
+                        "surface-dim": "#131313",
+                        "on-secondary": "#103729",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary": "#003824",
+                        "primary-container": "#10b981",
+                        "surface-bright": "#3a3939",
+                        "primary-fixed-dim": "#4edea3",
+                        "on-surface": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "gutter": "32px",
+                        "container-max": "1440px",
+                        "section-gap": "128px",
+                        "margin-mobile": "24px",
+                        "margin-desktop": "64px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "label-mono": ["JetBrains Mono"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["36px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-mono": ["12px", { "lineHeight": "1.5", "letterSpacing": "0.1em", "fontWeight": "500" }],
+                        "headline-md": ["32px", { "lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+                        "headline-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+                        "display-lg": ["72px", { "lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { background-color: #0A0A0A; }
+        .tech-border { border: 1px solid #262626; }
+        .emerald-border { border: 1px solid #10B981; }
+        .emerald-text { color: #10B981; }
+        .emerald-bg { background-color: #10B981; }
+        .glass-panel { background: rgba(18, 18, 18, 0.4); backdrop-filter: blur(12px); border: 1px solid #262626; }
+    </style>
+</head>
+<body class="text-on-background font-body-md bg-background selection:bg-primary-container selection:text-black antialiased overflow-x-hidden">
+<!-- TopNavBar Shared Component -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 bg-background/90 backdrop-blur-sm border-b border-outline-variant flat no shadows">
+<a class="font-headline-sm text-headline-sm tracking-tighter text-primary dark:text-primary hover:text-primary transition-colors duration-200" href="#">
+            SENTINEL AI
+        </a>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-on-surface-variant font-label-mono text-label-mono uppercase hover:text-primary transition-colors duration-200" href="#problem">Problem</a>
+<a class="text-on-surface-variant font-label-mono text-label-mono uppercase hover:text-primary transition-colors duration-200" href="#solution">Solution</a>
+<a class="text-on-surface-variant font-label-mono text-label-mono uppercase hover:text-primary transition-colors duration-200" href="#stack">Stack</a>
+<a class="text-on-surface-variant font-label-mono text-label-mono uppercase hover:text-primary transition-colors duration-200" href="#privacy">Privacy</a>
+<a class="text-on-surface-variant font-label-mono text-label-mono uppercase hover:text-primary transition-colors duration-200" href="#team">Team</a>
+</div>
+<button class="bg-primary text-[#0A0A0A] px-6 py-2 font-label-mono text-label-mono hover:bg-primary-fixed transition-colors">
+            Get Started
+        </button>
+</nav>
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-32 pb-section-gap">
+<!-- Hero Section -->
+<section class="min-h-[819px] flex flex-col justify-center items-start border-l tech-border pl-gutter mb-section-gap relative">
+<div class="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at top right, #10B981, transparent 70%);"></div>
+<p class="font-label-mono text-label-mono emerald-text mb-8 tracking-widest">[ SYSTEM_INIT // v1.0.0 ]</p>
+<h1 class="font-display-lg text-display-lg mb-6 max-w-4xl text-on-surface tracking-tighter leading-none">
+                Virtual Desktop Pet <br/>&amp; AI Assistant
+            </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mb-12 border-l-2 border-primary-container pl-6">
+                Privacy-first workspace companionship. A technical companion that resides on your desktop, analyzing context securely without sending sensitive data to the cloud.
+            </p>
+<div class="flex flex-col sm:flex-row gap-6">
+<a class="emerald-border text-primary px-8 py-4 font-label-mono text-label-mono uppercase tracking-widest hover:bg-primary-container hover:text-black transition-all flex items-center gap-2 group" href="#demo">
+<span class="material-symbols-outlined group-hover:animate-pulse">play_circle</span>
+                    Watch Demo
+                </a>
+<a class="border border-on-surface text-on-surface px-8 py-4 font-label-mono text-label-mono uppercase tracking-widest hover:bg-surface-container-high transition-all flex items-center gap-2" href="#slides">
+<span class="material-symbols-outlined">description</span>
+                    View Pitch Deck
+                </a>
+</div>
+</section>
+<!-- Problem -> Solution Section -->
+<section class="mb-section-gap scroll-mt-32" id="problem">
+<div class="font-label-mono text-label-mono text-on-surface-variant mb-12 flex items-center gap-4">
+<span class="w-12 h-px bg-outline-variant"></span>
+                [ 01 / STATEMENT ]
+            </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-outline-variant">
+<div class="bg-background p-12 lg:p-16 relative group">
+<div class="absolute top-4 right-4 w-4 h-4 border-t border-r border-outline-variant group-hover:border-error transition-colors"></div>
+<h3 class="font-label-mono text-label-mono text-error mb-4">_PROBLEM</h3>
+<p class="font-headline-md text-headline-md text-on-surface-variant leading-tight">
+                        Modern workspaces lack contextual, privacy-respecting companionship. Cloud-dependent AI assistants compromise local security and disrupt workflow continuity.
+                    </p>
+</div>
+<div class="bg-background p-12 lg:p-16 relative group">
+<div class="absolute top-4 right-4 w-4 h-4 border-t border-r border-outline-variant group-hover:border-primary-container transition-colors"></div>
+<h3 class="font-label-mono text-label-mono emerald-text mb-4">_SOLUTION</h3>
+<p class="font-headline-md text-headline-md text-on-surface leading-tight">
+                        A strictly local, context-aware digital companion. Operating directly on the desktop overlay, ensuring absolute data sovereignty while providing intelligent workflow assistance.
+                    </p>
+</div>
+</div>
+</section>
+<!-- Demo Section -->
+<section class="mb-section-gap scroll-mt-32" id="demo">
+<div class="font-label-mono text-label-mono text-on-surface-variant mb-12 flex items-center gap-4">
+<span class="w-12 h-px bg-outline-variant"></span>
+                [ 02 / DEMO ]
+            </div>
+<div class="aspect-video w-full emerald-border bg-surface-container-lowest relative overflow-hidden group">
+<div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+<span class="material-symbols-outlined text-6xl text-primary opacity-50 group-hover:opacity-100 transition-opacity drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]">play_arrow</span>
+</div>
+<div class="w-full h-full bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity duration-500 mix-blend-luminosity" data-alt="A highly detailed, ultra-realistic digital mockup of a futuristic desktop environment in a dark mode setting. The screen displays a sleek, minimalist AI assistant interface with glowing emerald green accents (#10B981) against a deep obsidian black background (#0A0A0A). The virtual pet is a stylized, geometric low-poly creature hovering near terminal-like windows showing code. The lighting is moody, cinematic, and emphasizes sharp 1px borders and high contrast. The overall aesthetic is techno-brutalist, professional, and secure." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBW3kIuNFrSiFXSfDhx41b10v_G4RuDJ_OX_1EFsn3VVW9eskyG5sqmTkZAFsJi-HQxq_sGxru3CBmGFBke4pUuK62aFPXko75K93q4bZz11_BJ8xUqvIoHWqiXtZD0gk8dc7jbcuHJ0ZHZoaPf6eIAngqkv7BlWzeRv--5ah3Ikqr5IgEl870kYcv72aXllD_IQMX6xeMtrrbxN0saRHmlyd6hUJYr-CCcesSqHggFAQb3_REgxKyK0g')"></div>
+<div class="absolute bottom-0 left-0 w-full p-4 border-t border-outline-variant bg-background/80 backdrop-blur-md flex justify-between items-center font-label-mono text-label-mono text-on-surface-variant">
+<span>STATUS: READY</span>
+<span>00:00 / 02:45</span>
+</div>
+</div>
+</section>
+<!-- Pitch Deck Section -->
+<section class="mb-section-gap scroll-mt-32" id="slides">
+<div class="font-label-mono text-label-mono text-on-surface-variant mb-12 flex items-center gap-4">
+<span class="w-12 h-px bg-outline-variant"></span>
+                [ 03 / SLIDES ]
+            </div>
+<div class="aspect-[16/9] w-full tech-border bg-surface-container-low flex flex-col">
+<div class="w-full h-12 border-b tech-border flex items-center px-4 gap-2 bg-surface-container-highest">
+<span class="w-3 h-3 rounded-full bg-outline-variant"></span>
+<span class="w-3 h-3 rounded-full bg-outline-variant"></span>
+<span class="w-3 h-3 rounded-full bg-outline-variant"></span>
+<span class="ml-4 font-label-mono text-label-mono text-on-surface-variant">sentinel_deck_vfinal.pdf</span>
+</div>
+<div class="flex-1 relative bg-surface-container-lowest flex items-center justify-center p-12">
+<div class="max-w-2xl text-center">
+<h3 class="font-headline-lg text-headline-lg text-on-surface mb-6">Redefining Desktop Companionship</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8">Secure, contextual, and unobtrusive.</p>
+<div class="flex justify-center gap-4">
+<button class="w-10 h-10 border tech-border flex items-center justify-center hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="w-10 h-10 border tech-border flex items-center justify-center hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Tech Stack Section -->
+<section class="mb-section-gap scroll-mt-32" id="stack">
+<div class="font-label-mono text-label-mono text-on-surface-variant mb-12 flex items-center gap-4">
+<span class="w-12 h-px bg-outline-variant"></span>
+                [ 04 / STACK ]
+            </div>
+<div class="border tech-border overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high font-label-mono text-label-mono text-on-surface-variant uppercase border-b tech-border">
+<th class="p-6 font-medium">Technology</th>
+<th class="p-6 font-medium hidden sm:table-cell border-l tech-border">Category</th>
+<th class="p-6 font-medium border-l tech-border">Implementation</th>
+</tr>
+</thead>
+<tbody class="font-label-mono text-label-mono">
+<tr class="border-b tech-border hover:bg-surface-container-lowest transition-colors">
+<td class="p-6 text-on-surface">Flutter Desktop</td>
+<td class="p-6 text-on-surface-variant hidden sm:table-cell border-l tech-border">Framework</td>
+<td class="p-6 text-on-surface-variant border-l tech-border">Cross-platform UI rendering engine</td>
+</tr>
+<tr class="border-b tech-border hover:bg-surface-container-lowest transition-colors">
+<td class="p-6 text-on-surface">window_manager</td>
+<td class="p-6 text-on-surface-variant hidden sm:table-cell border-l tech-border">System API</td>
+<td class="p-6 text-on-surface-variant border-l tech-border">Borderless overlay &amp; always-on-top execution</td>
+</tr>
+<tr class="border-b tech-border hover:bg-surface-container-lowest transition-colors">
+<td class="p-6 text-on-surface">Rive / Lottie</td>
+<td class="p-6 text-on-surface-variant hidden sm:table-cell border-l tech-border">Animation</td>
+<td class="p-6 text-on-surface-variant border-l tech-border">State-driven vector companion animations</td>
+</tr>
+<tr class="border-b tech-border hover:bg-surface-container-lowest transition-colors">
+<td class="p-6 text-on-surface">screen_capturer</td>
+<td class="p-6 text-on-surface-variant hidden sm:table-cell border-l tech-border">Vision</td>
+<td class="p-6 text-on-surface-variant border-l tech-border">Local contextual analysis (opt-in)</td>
+</tr>
+<tr class="border-b tech-border hover:bg-surface-container-lowest transition-colors">
+<td class="p-6 text-on-surface">isar</td>
+<td class="p-6 text-on-surface-variant hidden sm:table-cell border-l tech-border">Database</td>
+<td class="p-6 text-on-surface-variant border-l tech-border">High-performance local NoSQL storage</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Privacy Section -->
+<section class="mb-section-gap scroll-mt-32" id="privacy">
+<div class="font-label-mono text-label-mono text-on-surface-variant mb-12 flex items-center gap-4">
+<span class="w-12 h-px bg-outline-variant"></span>
+                [ 05 / TRUST ]
+            </div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="border tech-border p-8 hover:border-primary-container transition-colors group">
+<span class="material-symbols-outlined text-4xl mb-6 text-on-surface-variant group-hover:text-primary transition-colors">shield_lock</span>
+<h4 class="font-label-mono text-label-mono text-on-surface mb-4 uppercase">Explicit Consent</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Zero implicit data capture. Screen analysis and contextual awareness require explicit user authorization per session.</p>
+</div>
+<div class="border tech-border p-8 hover:border-primary-container transition-colors group bg-surface-container-lowest">
+<span class="material-symbols-outlined text-4xl mb-6 text-on-surface-variant group-hover:text-primary transition-colors">visibility</span>
+<h4 class="font-label-mono text-label-mono text-on-surface mb-4 uppercase">Active Indicator</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Hardware-level UI indicators constantly display when contextual analysis or screen capturing is actively running.</p>
+</div>
+<div class="border tech-border p-8 hover:border-primary-container transition-colors group">
+<span class="material-symbols-outlined text-4xl mb-6 text-on-surface-variant group-hover:text-primary transition-colors">vpn_key</span>
+<h4 class="font-label-mono text-label-mono text-on-surface mb-4 uppercase">Local Keys</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">All configuration, history, and context data are encrypted and stored locally. No cloud synchronization of sensitive context.</p>
+</div>
+</div>
+</section>
+<!-- Team Section -->
+<section class="mb-section-gap scroll-mt-32" id="team">
+<div class="font-label-mono text-label-mono text-on-surface-variant mb-12 flex items-center gap-4">
+<span class="w-12 h-px bg-outline-variant"></span>
+                [ 06 / TEAM ]
+            </div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+<!-- Team Member -->
+<div class="flex flex-col items-center group">
+<div class="w-24 h-24 rounded-full border tech-border flex items-center justify-center mb-6 group-hover:border-primary-container transition-colors">
+<span class="font-headline-md text-headline-md text-on-surface-variant group-hover:text-primary transition-colors">AN</span>
+</div>
+<h5 class="font-label-mono text-label-mono text-on-surface uppercase tracking-widest">Anmay</h5>
+<p class="font-label-mono text-label-mono text-on-surface-variant text-[10px] mt-2">Core Arch</p>
+</div>
+<!-- Team Member -->
+<div class="flex flex-col items-center group">
+<div class="w-24 h-24 rounded-full border tech-border flex items-center justify-center mb-6 group-hover:border-primary-container transition-colors">
+<span class="font-headline-md text-headline-md text-on-surface-variant group-hover:text-primary transition-colors">NB</span>
+</div>
+<h5 class="font-label-mono text-label-mono text-on-surface uppercase tracking-widest">Nabeel</h5>
+<p class="font-label-mono text-label-mono text-on-surface-variant text-[10px] mt-2">Systems</p>
+</div>
+<!-- Team Member -->
+<div class="flex flex-col items-center group">
+<div class="w-24 h-24 rounded-full border tech-border flex items-center justify-center mb-6 group-hover:border-primary-container transition-colors">
+<span class="font-headline-md text-headline-md text-on-surface-variant group-hover:text-primary transition-colors">AM</span>
+</div>
+<h5 class="font-label-mono text-label-mono text-on-surface uppercase tracking-widest">Amrutha</h5>
+<p class="font-label-mono text-label-mono text-on-surface-variant text-[10px] mt-2">Vision / ML</p>
+</div>
+<!-- Team Member -->
+<div class="flex flex-col items-center group">
+<div class="w-24 h-24 rounded-full border tech-border flex items-center justify-center mb-6 group-hover:border-primary-container transition-colors">
+<span class="font-headline-md text-headline-md text-on-surface-variant group-hover:text-primary transition-colors">AY</span>
+</div>
+<h5 class="font-label-mono text-label-mono text-on-surface uppercase tracking-widest">Ananya</h5>
+<p class="font-label-mono text-label-mono text-on-surface-variant text-[10px] mt-2">UI / UX</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Shared Component -->
+<footer class="w-full bg-background dark:bg-background border-t border-outline-variant flat no shadows font-label-mono text-label-mono transition-all duration-300 flex flex-col md:flex-row justify-between items-center px-margin-desktop py-gutter gap-4">
+<span class="text-on-surface">Â© 2024 SENTINEL AI. PRIVACY BY DESIGN.</span>
+<div class="flex gap-6">
+<a class="text-on-surface-variant hover:text-primary underline" href="#">GitHub</a>
+<a class="text-on-surface-variant hover:text-primary underline" href="#">Documentation</a>
+<a class="text-on-surface-variant hover:text-primary underline" href="#">Contact</a>
+<a class="text-on-surface-variant hover:text-primary underline" href="#">Security Policy</a>
+</div>
+</footer>
+</body></html>
