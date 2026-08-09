@@ -7,7 +7,7 @@ import '../core/storage.dart';
 import '../core/scheduler_isolate.dart';
 import '../core/notification_setup.dart';
 import '../core/storage.dart';
-
+import '../ui/radial_menu.dart';
 import '../ui/settings_page.dart';
 
 class PetWindow extends StatefulWidget {
@@ -87,17 +87,22 @@ class _PetWindowState extends State<PetWindow> with WindowListener {
           windowManager.startDragging();
         },
         onSecondaryTap: () async {
-          // Temporarily expand the window so we can actually read the settings!
-          final originalSize = await windowManager.getSize();
+          // Expand window so we can see the quick access menu clearly
           await windowManager.setSize(const Size(400, 500));
           
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const SettingsPage()),
+          if (!mounted) return;
+          await showDialog(
+            context: context,
+            builder: (context) {
+              return RadialMenuOverlay(
+                onClose: () => Navigator.pop(context),
+              );
+            },
           );
-          
-          // Shrink back to pet size when settings is closed
-          await windowManager.setSize(originalSize);
+
+          // Shrink back to normal pet size when closed
+          final config = await Storage.getConfig();
+          await windowManager.setSize(Size(config.size, config.size));
         },
         child: const Center(
           // For testing without a local asset, we use a network Rive animation.

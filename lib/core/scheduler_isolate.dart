@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../models/pet_config.dart';
 import '../models/reminder.dart';
+import '../models/shortcut.dart';
 
 // Since we use flutter_local_notifications in the background isolate, 
 // we might run into issues if the plugin requires UI thread.
@@ -35,7 +36,7 @@ class SchedulerIsolate {
       isar = Isar.getInstance()!;
     } else {
       isar = await Isar.open(
-        [PetConfigSchema, ReminderSchema],
+        [PetConfigSchema, ReminderSchema, QuickAccessShortcutSchema],
         directory: dbPath,
       );
     }
