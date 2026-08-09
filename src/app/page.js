@@ -39,7 +39,7 @@ export default function Home() {
 <span className="material-symbols-outlined group-hover:animate-pulse">play_circle</span>
                     Watch Video
                 </a>
-<a className="border border-on-surface text-on-surface px-8 py-4 font-label-mono text-label-mono uppercase tracking-widest hover:bg-surface-container-high transition-all flex items-center gap-2" href="#slides">
+<a className="border border-on-surface text-on-surface px-8 py-4 font-label-mono text-label-mono uppercase tracking-widest hover:bg-surface-container-high transition-all flex items-center gap-2" href="/ppt">
 <span className="material-symbols-outlined">description</span>
                     View PPT
                 </a>
