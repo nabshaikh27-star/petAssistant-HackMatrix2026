@@ -1,0 +1,51 @@
+name: desktop_pet
+description: A Desktop Pet AI Assistant.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Window & System Management
+  window_manager: ^0.4.3
+  tray_manager: ^0.2.2
+  hotkey_manager: ^0.1.8
+
+  # Animations
+  rive: ^0.13.1
+
+  # Local Storage
+  isar: ^3.1.0
+  isar_flutter_libs: ^3.1.0
+  flutter_secure_storage: ^9.2.2
+
+  # Notifications
+  local_notifier: ^0.1.6
+  file_picker: ^8.0.3
+  image_picker: ^1.1.2
+
+  # Screen Capture & Path Launching
+  screen_capturer: ^0.1.5
+  url_launcher: ^6.3.0
+
+  # Networking & State Management
+  dio: ^5.5.0+1
+  connectivity_plus: ^6.0.4
+  flutter_riverpod: ^2.5.1
+  image: ^4.2.0
+  launch_at_startup: ^0.2.2
+  package_info_plus: ^8.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.11
+  isar_generator: ^3.1.0
+
+flutter:
+  uses-material-design: true
