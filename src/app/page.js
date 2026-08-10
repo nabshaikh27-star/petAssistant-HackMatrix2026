@@ -31,7 +31,7 @@ export default function Home() {
                 Privacy-first workspace companionship. A technical companion that resides on your desktop, analyzing context securely without sending sensitive data to the cloud.
             </p>
 <div className="flex flex-col sm:flex-row gap-6">
-<a className="bg-primary text-[#0A0A0A] px-8 py-4 font-label-mono text-label-mono uppercase tracking-widest hover:bg-primary-fixed transition-all flex items-center gap-2" href="/CodingRockerz_Installer.exe" download>
+<a className="bg-primary text-[#0A0A0A] px-8 py-4 font-label-mono text-label-mono uppercase tracking-widest hover:bg-primary-fixed transition-all flex items-center gap-2" href="/Hackathon_Submission.zip" download="Hackathon_Submission.zip">
 <span className="material-symbols-outlined">download</span>
                     Download for Windows
                 </a>
