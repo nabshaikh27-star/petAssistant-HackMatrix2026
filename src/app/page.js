@@ -61,7 +61,7 @@ export default function Home() {
 </div>
 <div className="bg-background p-12 lg:p-16 relative group">
 <div className="absolute top-4 right-4 w-4 h-4 border-t border-r border-outline-variant group-hover:border-primary-container transition-colors"></div>
-<h3 className="font-label-mono text-label-mono emerald-text mb-4">_SOLUTION</h3>
+<h3 id="solution" className="font-label-mono text-label-mono emerald-text mb-4 scroll-mt-32">_SOLUTION</h3>
 <p className="font-headline-md text-headline-md text-on-surface leading-tight">
                         A strictly local, context-aware digital companion. Operating directly on the desktop overlay, ensuring absolute data sovereignty with offline-first capabilities, custom reminders, and intelligent workflow assistance.
                     </p>
@@ -82,31 +82,6 @@ export default function Home() {
 <div className="absolute bottom-0 left-0 w-full p-4 border-t border-outline-variant bg-background/80 backdrop-blur-md flex justify-between items-center font-label-mono text-label-mono text-on-surface-variant">
 <span>STATUS: READY</span>
 <span>00:00 / 02:45</span>
-</div>
-</div>
-</section>
-{/* Pitch Deck Section */}
-<section className="mb-section-gap scroll-mt-32" id="slides">
-<div className="font-label-mono text-label-mono text-on-surface-variant mb-12 flex items-center gap-4">
-<span className="w-12 h-px bg-outline-variant"></span>
-                [ 03 / SLIDES ]
-            </div>
-<div className="aspect-[16/9] w-screen relative left-1/2 -translate-x-1/2 tech-border bg-surface-container-low flex flex-col">
-<div className="w-full h-12 border-b tech-border flex items-center px-4 gap-2 bg-surface-container-highest">
-<span className="w-3 h-3 rounded-full bg-outline-variant"></span>
-<span className="w-3 h-3 rounded-full bg-outline-variant"></span>
-<span className="w-3 h-3 rounded-full bg-outline-variant"></span>
-<span className="ml-4 font-label-mono text-label-mono text-on-surface-variant">coding_rockerz_deck_vfinal.pdf</span>
-</div>
-<div className="flex-1 relative bg-surface-container-lowest flex items-center justify-center p-12">
-<div className="max-w-2xl text-center">
-<h3 className="font-headline-lg text-headline-lg text-on-surface mb-6">Redefining Desktop Companionship</h3>
-<p className="font-body-lg text-body-lg text-on-surface-variant mb-8">Secure, contextual, and unobtrusive.</p>
-<div className="flex justify-center gap-4">
-<button className="w-10 h-10 border tech-border flex items-center justify-center hover:bg-surface-container-high transition-colors"><span className="material-symbols-outlined text-sm">chevron_left</span></button>
-<button className="w-10 h-10 border tech-border flex items-center justify-center hover:bg-surface-container-high transition-colors"><span className="material-symbols-outlined text-sm">chevron_right</span></button>
-</div>
-</div>
 </div>
 </div>
 </section>
